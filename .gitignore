@@ -1,2 +1,7 @@
 .DS_Store
 .idea
+
+.python-version
+
+data/wrkchain/*.json
+data/beacon/*.json
