@@ -1,4 +1,5 @@
 
-simplejson
 click
 requests
+simplejson
+matplotlib
