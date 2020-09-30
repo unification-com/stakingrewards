@@ -23,26 +23,6 @@ def root_path() -> Path:
     return data_dir
 
 
-def write_d(d):
-    target = root_path() / f'cache.json'
-    target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
-
-
-def write_page(the_type, d, n):
-    target = root_path() / the_type / f'page{n}.json'
-    target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
-
-
-def read_d():
-    target = root_path() / f'cache.json'
-    if target.exists():
-        contents = target.read_text()
-        d = json.loads(contents)
-    else:
-        d = {}
-    return d
-
-
 def get_headers():
     return {
         'Content-Type': 'application/json',
