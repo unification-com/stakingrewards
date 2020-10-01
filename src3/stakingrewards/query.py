@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 BASE_URL = 'https://rest2.unification.io'
 
-REGISTRATION_COST = 1000
+REGISTRATION_COST = 10000
 TIMESTAMP_COST = 1
 
 
