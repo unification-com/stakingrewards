@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  stakingrewards:
+    container_name: stakingrewards
+    build:
+      context: ..
+      dockerfile: Docker/stakingrewards/Dockerfile
