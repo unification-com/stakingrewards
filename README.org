@@ -1,0 +1,10 @@
+#+STARTUP: SHOWEVERYTHING
+* StakingRewards Integration
+
+Just type `make` and a Docker container will be built. 
+#+BEGIN_SRC
+make
+#+END_SRC
+
+`make run` will run the container.
+
