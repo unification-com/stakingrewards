@@ -123,38 +123,81 @@ def load_data():
            beacon_submissions, wrkchain_submissions
 
 
+def plot_instantaneous_rewards(mergedlist):
+    import matplotlib.pyplot as plt
+    timestamps = [x[0] for x in mergedlist]
+    fund = [x[2] for x in mergedlist]
+    plt.scatter(timestamps, fund)
+
+    plt.xlabel('Date')
+    plt.ylabel('FUND entered')
+
+    # giving a title to my graph
+    plt.title('Instantaneous rewards')
+
+    # function to show the plot
+    plt.savefig('instantaneous.pdf', format='pdf', dpi=1200)
+    plt.show()
+
+
+def plot_accumulated_rewards(accumulation_list):
+    import matplotlib.pyplot as plt
+    timestamps = [x[0] for x in accumulation_list]
+    fund = [x[2] for x in accumulation_list]
+
+    plt.scatter(timestamps, fund)
+    plt.xlabel('Date')
+    plt.ylabel('FUND entered')
+    plt.title('Accumulated rewards')
+
+    log.info('Saving image')
+    plt.savefig('accumulated.pdf', format='pdf', dpi=1200)
+    plt.show()
+
+
 @main.command()
 def pry():
+    log.info('Loading data')
     beacon_registrations, wrkchain_registrations, beacon_submissions, \
     wrkchain_submissions = load_data()
 
+    log.info('Plotting data')
     mergedlist = beacon_registrations + wrkchain_registrations + \
                  beacon_submissions + wrkchain_submissions
     mergedlist = sorted(mergedlist, key=lambda x: x[0])
 
-    # accumulate
-    new_list = []
+    y1 = datetime.strptime('2020-09-01', "%Y-%m-%d")
+
+    accumulation_list = []
     acc = 0
-    for dt, hash, value in mergedlist:
+    x1 = None
+    for dt, submission_hash, value in mergedlist:
+        if dt > y1 and x1 is None:
+            x1 = acc
         acc = acc + value
-        new_list.append((dt, acc))
+        accumulation_list.append((dt, submission_hash, acc))
 
-    timestamps = [x[0] for x in new_list]
-    fund = [x[1] for x in new_list]
+    first = accumulation_list[0][0]
+    last = accumulation_list[-1][0]
+    x2 = acc
+    y2 = last
+    log.info(f'First item: {first}')
+    log.info(f'Last item: {last}')
 
-    plt.scatter(timestamps, fund)
+    duration = abs((last - first).days)
+    log.info(f'Duration: {duration}')
 
-    # naming the x axis
-    plt.xlabel('timestamp')
-    # naming the y axis
-    plt.ylabel('FUND spent')
+    sample_duration = abs((y2 - y1).days)
+    delta = x2 - x1
+    per_day = delta / sample_duration
+    log.info(f'{x1} {y1} {x2} {y1}')
+    log.info(f'{sample_duration} days {y1} with delta {delta} is {per_day} FUND per day')
 
-    # giving a title to my graph
-    plt.title('Accumulated rewards')
 
-    # function to show the plot
-    plt.show()
+    # plot_instantaneous_rewards(mergedlist)
+    # plot_accumulated_rewards(accumulation_list)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
     main()
