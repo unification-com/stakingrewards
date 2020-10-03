@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-import matplotlib.pyplot as plt
+
 import requests
 
 log = logging.getLogger(__name__)
@@ -22,6 +22,10 @@ def root_path() -> Path:
     data_dir = current_script.parent.parent.parent / 'data'
     return data_dir
 
+
+def write_page(the_type, d, n):
+    target = root_path() / the_type / f'page{n}.json'
+    target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
 
 def get_headers():
     return {
@@ -105,6 +109,9 @@ def load_data():
     for n, br in enumerate(beacon_registrations):
         timestamps = d['app_state']['beacon']['registered_beacons'][n][
             'timestamps']
+        if timestamps is None:
+            log.warning(f"Registered Beacon with not timestamps")
+            continue
         for stamp in timestamps:
             beacon_submissions.append(
                 (datetime.utcfromtimestamp(int(stamp['submit_time'])),
@@ -114,6 +121,9 @@ def load_data():
     for n, br in enumerate(wrkchain_registrations):
         timestamps = d['app_state']['wrkchain']['registered_wrkchains'][n][
             'blocks']
+        if timestamps is None:
+            log.warning(f"Registered WRKChain with not timestamps")
+            continue
         for stamp in timestamps:
             wrkchain_submissions.append(
                 (datetime.utcfromtimestamp(int(stamp['sub_time'])),
@@ -131,12 +141,12 @@ def plot_instantaneous_rewards(mergedlist):
 
     plt.xlabel('Date')
     plt.ylabel('FUND entered')
-
-    # giving a title to my graph
     plt.title('Instantaneous rewards')
 
-    # function to show the plot
-    plt.savefig('instantaneous.pdf', format='pdf', dpi=1200)
+    log.info('Saving image')
+    fig1 = plt.gcf()
+    fig1.set_size_inches(18.5, 10.5)
+    fig1.savefig('instantaneous.png', dpi=200)
     plt.show()
 
 
@@ -151,7 +161,9 @@ def plot_accumulated_rewards(accumulation_list):
     plt.title('Accumulated rewards')
 
     log.info('Saving image')
-    plt.savefig('accumulated.pdf', format='pdf', dpi=1200)
+    fig1 = plt.gcf()
+    fig1.set_size_inches(18.5, 10.5)
+    fig1.savefig('accumulated.png', dpi=200)
     plt.show()
 
 
@@ -193,9 +205,8 @@ def pry():
     log.info(f'{x1} {y1} {x2} {y1}')
     log.info(f'{sample_duration} days {y1} with delta {delta} is {per_day} FUND per day')
 
-
-    # plot_instantaneous_rewards(mergedlist)
-    # plot_accumulated_rewards(accumulation_list)
+    plot_instantaneous_rewards(mergedlist)
+    plot_accumulated_rewards(accumulation_list)
 
 
 if __name__ == "__main__":
