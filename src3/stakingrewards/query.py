@@ -90,12 +90,14 @@ def get_wrkchain_registrations():
         yield read_date(tx['timestamp']), tx['txhash'], REGISTRATION_COST
 
 
-@main.command()
-def pry():
+def load_data():
     target = root_path() / 'genesis' / f'genesis.json'
     contents = target.read_text()
     d = json.loads(contents)
 
+    # Beacon registration dates are missing from the Genesis export,
+    # so get them from the API. WRKChain registrations exist, but get them from
+    # the API for symmetry
     beacon_registrations = list(get_beacon_registrations())
     wrkchain_registrations = list(get_wrkchain_registrations())
 
@@ -116,6 +118,15 @@ def pry():
             wrkchain_submissions.append(
                 (datetime.utcfromtimestamp(int(stamp['sub_time'])),
                  stamp['blockhash'], TIMESTAMP_COST))
+
+    return beacon_registrations, wrkchain_registrations, \
+           beacon_submissions, wrkchain_submissions
+
+
+@main.command()
+def pry():
+    beacon_registrations, wrkchain_registrations, beacon_submissions, \
+    wrkchain_submissions = load_data()
 
     mergedlist = beacon_registrations + wrkchain_registrations + \
                  beacon_submissions + wrkchain_submissions
