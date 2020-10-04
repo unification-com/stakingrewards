@@ -167,6 +167,49 @@ def plot_accumulated_rewards(accumulation_list):
     plt.show()
 
 
+def calc(daily):
+    validator_power = 1.88 / 100
+    std_commission = 10 / 100
+    validator_earns = daily * validator_power
+    commission_charged = validator_earns * std_commission
+    delegators_earns = validator_earns - commission_charged
+
+    total_stake = 56473787  # TODO: Fetch me
+    principal = 1000
+    thousand_fund = principal / (total_stake * validator_power)
+
+    daily_earning = delegators_earns * thousand_fund
+    daily_interest_rate = daily_earning / principal
+    monthly = daily_earning * 30
+    annual_earnings = daily_earning * 365
+
+    monthly_compound = principal * ((1 + daily_interest_rate) ** 30)
+    annual_earnings_comp = principal * ((1 + daily_interest_rate) ** 365)
+
+    rate = (annual_earnings / principal) * 100
+    compounding_rate = ((annual_earnings_comp - principal) / principal) * 100
+
+    print(f"A validator that has {validator_power * 100:.2f}% power will "
+          f"earn {validator_earns:.2f} FUND of the daily distribution of "
+          f"{daily:.2f} FUND.")
+    print(f"If the validator charges {std_commission * 100:.2f}% commission, "
+          f"the validator will take {commission_charged:.2f} FUND as "
+          f"commission.")
+    print(f"The remaining {delegators_earns:.2f} FUND is distributed to "
+          f"delegators.")
+    print(f"Staking {principal} FUND of the total "
+          f"{total_stake * validator_power:.2f} FUND that the validator "
+          f"stakes, means")
+    print(f"The daily earnings is {daily_earning:.2f} FUND representing a "
+          f"daily interest rate of {daily_interest_rate * 100:.4f}%")
+    print(f"The monthly earning is {monthly:.2f} FUND")
+    print(f"Monthly amount compounded daily is {monthly_compound:.2f} FUND")
+    print(f"The annual earnings is {annual_earnings:.2f} FUND and the earnings "
+          f"compounded is {annual_earnings_comp:.2f} FUND")
+    print(f"APY rate is {rate:.2f} % or the compound rate "
+          f"{compounding_rate:.2f} %")
+
+
 @main.command()
 def pry():
     log.info('Loading data')
@@ -203,7 +246,10 @@ def pry():
     delta = x2 - x1
     per_day = delta / sample_duration
     log.info(f'{x1} {y1} {x2} {y1}')
-    log.info(f'{sample_duration} days {y1} with delta {delta} is {per_day} FUND per day')
+    log.info(f'{sample_duration} days {y1} with delta {delta} is {per_day} '
+             f'FUND per day')
+
+    calc(per_day)
 
     plot_instantaneous_rewards(mergedlist)
     plot_accumulated_rewards(accumulation_list)
