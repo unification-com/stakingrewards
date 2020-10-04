@@ -35,6 +35,6 @@ COPY src3 /src
 
 EXPOSE 8050
 
-RUN echo "python -m stakingrewards.query pry" >> /root/.bash_history && \
+RUN echo "python -m stakingrewards.cli report" >> /root/.bash_history && \
     echo "alias ll='ls -la'" >> /root/.bashrc
 

@@ -16,6 +16,11 @@ BASE_URL = 'https://rest2.unification.io'
 REGISTRATION_COST = 10000
 TIMESTAMP_COST = 1
 
+MAX_PAGES = 3478
+
+
+# https://rest2.unification.io/txs?message.action=record_wrkchain_hash&page=5
+# https://rest.unification.io/staking/validators?limit=100
 
 def root_path() -> Path:
     current_script = Path(os.path.abspath(__file__))
@@ -26,6 +31,7 @@ def root_path() -> Path:
 def write_page(the_type, d, n):
     target = root_path() / the_type / f'page{n}.json'
     target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
+
 
 def get_headers():
     return {
@@ -211,7 +217,7 @@ def calc(daily):
 
 
 @main.command()
-def pry():
+def report():
     log.info('Loading data')
     beacon_registrations, wrkchain_registrations, beacon_submissions, \
     wrkchain_submissions = load_data()

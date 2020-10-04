@@ -6,5 +6,5 @@ Just type `make` and a Docker container will be built.
 make
 #+END_SRC
 
-`make run` will run the container.
+`make report` will run the container and generate the report.
 

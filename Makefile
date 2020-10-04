@@ -5,6 +5,6 @@
 build:
 	docker-compose --file Docker/docker-compose.yml build
 
-run:
-	 docker run -it docker_stakingrewards /bin/bash
+report:
+	docker run -it docker_stakingrewards python -m stakingrewards.cli report
 
