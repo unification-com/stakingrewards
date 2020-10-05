@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from datetime import datetime
+from time import time
 from pathlib import Path
 
 import click
@@ -20,7 +21,7 @@ MAX_PAGES = 3478
 
 
 # https://rest2.unification.io/txs?message.action=record_wrkchain_hash&page=5
-# https://rest.unification.io/staking/validators?limit=100
+# https://rest2.unification.io/staking/validators?limit=100
 
 def root_path() -> Path:
     current_script = Path(os.path.abspath(__file__))
@@ -191,15 +192,15 @@ def calc(daily):
     thousand_fund = principal / (total_stake * validator_power)
 
     daily_earning = delegators_earns * thousand_fund
-    daily_interest_rate = daily_earning / principal
+    daily_rate = daily_earning / principal
     monthly_earnings = daily_earning * 30
     annual_earnings = daily_earning * 365
 
-    monthly_comprate = principal * ((1 + daily_interest_rate) ** 30)
-    annual_comprate = principal * ((1 + daily_interest_rate) ** 365)
+    monthly_rate_comp = principal * ((1 + daily_rate) ** 30)
+    annual_rate_comp = principal * ((1 + daily_rate) ** 365)
 
     rate = (annual_earnings / principal) * 100
-    compounding_rate = ((annual_comprate - principal) / principal) * 100
+    compounding_rate = ((annual_rate_comp - principal) / principal) * 100
 
     print(f"A validator that has {validator_power * 100:.2f}% power will "
           f"earn {validator_earns:.2f} FUND of the daily distribution of "
@@ -213,19 +214,21 @@ def calc(daily):
           f"{total_stake * validator_power:.2f} FUND that the validator "
           f"stakes, means")
     print(f"The daily earnings is {daily_earning:.2f} FUND representing a "
-          f"daily interest rate of {daily_interest_rate * 100:.4f}%")
+          f"daily interest rate of {daily_rate * 100:.4f}%")
     print(f"The monthly earning is {monthly_earnings:.2f} FUND")
-    print(f"Monthly amount compounded daily is {monthly_comprate:.2f} FUND")
+    print(f"Monthly amount compounded daily is {monthly_rate_comp:.2f} FUND")
     print(f"The annual earnings is {annual_earnings:.2f} FUND and the earnings "
-          f"compounded is {annual_comprate:.2f} FUND")
+          f"compounded is {annual_rate_comp:.2f} FUND")
     print(f"APY rate is {rate:.2f} % or the compound rate "
           f"{compounding_rate:.2f} %")
 
     return {
+        'daily_rate': daily_rate,
+        'principal': principal,
         'monthly_earnings': monthly_earnings,
-        'monthly_comprate': monthly_comprate,
+        'monthly_rate_comp': monthly_rate_comp,
         'annual_earnings': annual_earnings,
-        'annual_comprate': annual_comprate
+        'annual_rate_comp': annual_rate_comp
     }
 
 
@@ -271,6 +274,9 @@ def report(output, plot, genesis):
 
     d = calc(per_day)
 
+    now = int(time() * 1000)
+    d['timestamp_updated'] = now
+
     if plot:
         log.info('Plotting data')
         plot_instantaneous_rewards(mergedlist)
@@ -280,6 +286,7 @@ def report(output, plot, genesis):
     target = Path(output)
     target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
 
+#https://rest2.unification.io/staking/validators?limit=100
 
 if __name__ == "__main__":
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
