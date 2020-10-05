@@ -1,10 +1,10 @@
 #+STARTUP: SHOWEVERYTHING
 * StakingRewards Integration
 
-Just type `make` and a Docker container will be built. 
+Just type ~make~ and a Docker container will be built. 
 #+BEGIN_SRC
 make
 #+END_SRC
 
-`make report` will run the container and generate the report.
+~make report~ will run the container and generate the report.
 
