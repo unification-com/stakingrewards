@@ -276,7 +276,7 @@ def report(output, plot, genesis):
         plot_instantaneous_rewards(mergedlist)
         plot_accumulated_rewards(accumulation_list)
 
-    log.info('Saving arteficat')
+    log.info('Saving artefact')
     target = Path(output)
     target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
 
