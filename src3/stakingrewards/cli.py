@@ -2,13 +2,13 @@ import json
 import logging
 import os
 import time
+import requests
+
 from datetime import datetime
 from time import time
 from pathlib import Path
 
 import click
-
-import requests
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +21,6 @@ MAX_PAGES = 3478
 
 
 # https://rest2.unification.io/txs?message.action=record_wrkchain_hash&page=5
-# https://rest2.unification.io/staking/validators?limit=100
 
 def root_path() -> Path:
     current_script = Path(os.path.abspath(__file__))
@@ -180,14 +179,34 @@ def plot_accumulated_rewards(accumulation_list):
     plt.show()
 
 
+def power():
+    r = requests.get(
+        'https://rest2.unification.io/staking/validators?limit=100')
+    data = r.json()
+    total_shares = 0
+    num_validators = 0
+    total_commission = 0
+    for validator in data['result']:
+        total_shares = total_shares + float(validator['delegator_shares'])
+        num_validators = num_validators + 1
+        total_commission = total_commission + float(
+            validator['commission']['commission_rates']['rate'])
+
+    average_commission = total_commission / num_validators
+    total_shares_fund = total_shares / 1000000000
+    return num_validators, total_shares_fund, average_commission
+
+
 def calc(daily):
-    validator_power = 1.88 / 100
-    std_commission = 10 / 100
+    num_validators, total_shares, average_commission = power()
+
+    validator_power = 5 / 100
+    std_commission = average_commission
     validator_earns = daily * validator_power
     commission_charged = validator_earns * std_commission
     delegators_earns = validator_earns - commission_charged
 
-    total_stake = 56473787  # TODO: Fetch me
+    total_stake = int(total_shares)
     principal = 1000
     thousand_fund = principal / (total_stake * validator_power)
 
@@ -228,12 +247,16 @@ def calc(daily):
         'monthly_earnings': monthly_earnings,
         'monthly_rate_comp': monthly_rate_comp,
         'annual_earnings': annual_earnings,
-        'annual_rate_comp': annual_rate_comp
+        'annual_rate_comp': annual_rate_comp,
+        'average_commission': average_commission,
+        'num_validators': num_validators,
+        'total_shares': total_shares
     }
 
 
 @main.command()
-@click.option('-o', '--output', required=False, type=str, default="artefact.json")
+@click.option('-o', '--output', required=False, type=str,
+              default="artefact.json")
 @click.option('-p', '--plot', required=False, is_flag=True, default=False)
 @click.option('-g', '--genesis', required=False, type=str, default=None)
 def report(output, plot, genesis):
@@ -286,7 +309,6 @@ def report(output, plot, genesis):
     target = Path(output)
     target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
 
-#https://rest2.unification.io/staking/validators?limit=100
 
 if __name__ == "__main__":
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
