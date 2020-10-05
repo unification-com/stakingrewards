@@ -100,8 +100,14 @@ def get_wrkchain_registrations():
         yield read_date(tx['timestamp']), tx['txhash'], REGISTRATION_COST
 
 
-def load_data():
-    target = root_path() / 'genesis' / f'genesis.json'
+def load_data(genesis):
+    if genesis is None:
+        target = root_path() / 'genesis' / f'genesis.json'
+    else:
+        target = Path(genesis)
+
+    log.info(f'Loading genesis from {target}')
+
     contents = target.read_text()
     d = json.loads(contents)
 
@@ -225,10 +231,11 @@ def calc(daily):
 
 @main.command()
 @click.option('-o', '--output', required=False, type=str, default="artefact.json")
-def report(output):
-    log.info('Loading data')
+@click.option('-p', '--plot', required=False, is_flag=True, default=False)
+@click.option('-g', '--genesis', required=False, type=str, default=None)
+def report(output, plot, genesis):
     beacon_registrations, wrkchain_registrations, beacon_submissions, \
-    wrkchain_submissions = load_data()
+    wrkchain_submissions = load_data(genesis)
 
     mergedlist = beacon_registrations + wrkchain_registrations + \
                  beacon_submissions + wrkchain_submissions
@@ -264,9 +271,10 @@ def report(output):
 
     d = calc(per_day)
 
-    log.info('Plotting data')
-    plot_instantaneous_rewards(mergedlist)
-    plot_accumulated_rewards(accumulation_list)
+    if plot:
+        log.info('Plotting data')
+        plot_instantaneous_rewards(mergedlist)
+        plot_accumulated_rewards(accumulation_list)
 
     log.info('Saving arteficat')
     target = Path(output)
