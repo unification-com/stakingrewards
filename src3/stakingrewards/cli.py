@@ -212,7 +212,7 @@ def calc(daily):
 
     daily_earning = delegators_earns * thousand_fund
     daily_rate = daily_earning / principal
-    monthly_earnings = daily_earning * 30
+    monthly_earnings = daily_earning * (365 / 12)
     annual_earnings = daily_earning * 365
 
     monthly_rate_comp = principal * ((1 + daily_rate) ** 30)
