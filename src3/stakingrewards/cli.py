@@ -218,8 +218,8 @@ def calc(daily):
     monthly_rate_comp = principal * ((1 + daily_rate) ** 30)
     annual_rate_comp = principal * ((1 + daily_rate) ** 365)
 
-    rate = (annual_earnings / principal) * 100
-    compounding_rate = ((annual_rate_comp - principal) / principal) * 100
+    apr = (annual_earnings / principal) * 100
+    apr_comp = ((annual_rate_comp - principal) / principal) * 100
 
     print(f"A validator that has {validator_power * 100:.2f}% power will "
           f"earn {validator_earns:.2f} FUND of the daily distribution of "
@@ -238,8 +238,8 @@ def calc(daily):
     print(f"Monthly amount compounded daily is {monthly_rate_comp:.2f} FUND")
     print(f"The annual earnings is {annual_earnings:.2f} FUND and the earnings "
           f"compounded is {annual_rate_comp:.2f} FUND")
-    print(f"APY rate is {rate:.2f} % or the compound rate "
-          f"{compounding_rate:.2f} %")
+    print(f"APR rate is {apr:.2f} % or the compound rate "
+          f"{apr_comp:.2f} %")
 
     return {
         'daily_rate': daily_rate,
@@ -250,7 +250,9 @@ def calc(daily):
         'annual_rate_comp': annual_rate_comp,
         'average_commission': average_commission,
         'num_validators': num_validators,
-        'total_shares': total_shares
+        'total_shares': total_shares,
+        'apr': apr,
+        'apr_comp': apr_comp
     }
 
 
