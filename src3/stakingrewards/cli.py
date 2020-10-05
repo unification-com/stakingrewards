@@ -186,14 +186,14 @@ def calc(daily):
 
     daily_earning = delegators_earns * thousand_fund
     daily_interest_rate = daily_earning / principal
-    monthly = daily_earning * 30
+    monthly_earnings = daily_earning * 30
     annual_earnings = daily_earning * 365
 
-    monthly_compound = principal * ((1 + daily_interest_rate) ** 30)
-    annual_earnings_comp = principal * ((1 + daily_interest_rate) ** 365)
+    monthly_comprate = principal * ((1 + daily_interest_rate) ** 30)
+    annual_comprate = principal * ((1 + daily_interest_rate) ** 365)
 
     rate = (annual_earnings / principal) * 100
-    compounding_rate = ((annual_earnings_comp - principal) / principal) * 100
+    compounding_rate = ((annual_comprate - principal) / principal) * 100
 
     print(f"A validator that has {validator_power * 100:.2f}% power will "
           f"earn {validator_earns:.2f} FUND of the daily distribution of "
@@ -208,21 +208,28 @@ def calc(daily):
           f"stakes, means")
     print(f"The daily earnings is {daily_earning:.2f} FUND representing a "
           f"daily interest rate of {daily_interest_rate * 100:.4f}%")
-    print(f"The monthly earning is {monthly:.2f} FUND")
-    print(f"Monthly amount compounded daily is {monthly_compound:.2f} FUND")
+    print(f"The monthly earning is {monthly_earnings:.2f} FUND")
+    print(f"Monthly amount compounded daily is {monthly_comprate:.2f} FUND")
     print(f"The annual earnings is {annual_earnings:.2f} FUND and the earnings "
-          f"compounded is {annual_earnings_comp:.2f} FUND")
+          f"compounded is {annual_comprate:.2f} FUND")
     print(f"APY rate is {rate:.2f} % or the compound rate "
           f"{compounding_rate:.2f} %")
 
+    return {
+        'monthly_earnings': monthly_earnings,
+        'monthly_comprate': monthly_comprate,
+        'annual_earnings': annual_earnings,
+        'annual_comprate': annual_comprate
+    }
+
 
 @main.command()
-def report():
+@click.option('-o', '--output', required=False, type=str, default="artefact.json")
+def report(output):
     log.info('Loading data')
     beacon_registrations, wrkchain_registrations, beacon_submissions, \
     wrkchain_submissions = load_data()
 
-    log.info('Plotting data')
     mergedlist = beacon_registrations + wrkchain_registrations + \
                  beacon_submissions + wrkchain_submissions
     mergedlist = sorted(mergedlist, key=lambda x: x[0])
@@ -255,10 +262,15 @@ def report():
     log.info(f'{sample_duration} days {y1} with delta {delta} is {per_day} '
              f'FUND per day')
 
-    calc(per_day)
+    d = calc(per_day)
 
+    log.info('Plotting data')
     plot_instantaneous_rewards(mergedlist)
     plot_accumulated_rewards(accumulation_list)
+
+    log.info('Saving arteficat')
+    target = Path(output)
+    target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
 
 
 if __name__ == "__main__":
