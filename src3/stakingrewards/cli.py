@@ -329,25 +329,32 @@ def verify():
     total_count = data['total_count']
     txs = data['txs']
 
-    random_tx = randint(0, 30)
-    txhash = txs[random_tx]['txhash']
+    random_tx_number = randint(0, 30)
+    random_tx = txs[random_tx_number]
+    # TODO: WARN if more than one msg
+    blockhash = random_tx['tx']['value']['msg'][0]['value']['blockhash'].upper()
 
-    log.info(f"Searching for {txhash} through what should be around "
+    log.info(f"Searching for {blockhash} through what should be around "
              f"{total_count} wrkchain transactions")
 
     beacon_registrations, wrkchain_registrations, beacon_submissions, \
     wrkchain_submissions = load_data(None)
-    something = len(wrkchain_submissions)
-    log.info(f"Number of WRKCHAIN submissions in the extract is {something} "
+    num_hashes = len(wrkchain_submissions)
+    log.info(f"Number of WRKCHAIN submissions in the extract is {num_hashes} "
              f"and number on the number found on the API is {total_count}")
-    for wrkchain_submission in wrkchain_submissions:
-        txhash_b = wrkchain_submission[1]
-        target = txhash_b[2:].upper()
-        print(target)
-        if txhash == target:
-            log.info(f"Found it")
 
-    print(txhash)
+    found = False
+    for wrkchain_submission in wrkchain_submissions:
+        blockhash_b = wrkchain_submission[1]
+        target = blockhash_b.upper()
+        if blockhash == target:
+            found = True
+
+    if found:
+        log.info(f"Found the transaction in both datasets")
+    else:
+        log.error("Did not find the transaction")
+        exit(1)
 
 
 if __name__ == "__main__":
