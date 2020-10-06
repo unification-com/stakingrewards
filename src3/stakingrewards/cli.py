@@ -223,14 +223,15 @@ def calc(daily):
     print(f"A validator that has {validator_power * 100:.2f}% power will "
           f"earn {validator_earns:.2f} FUND of the daily distribution of "
           f"{daily:.2f} FUND.")
-    print(f"If the validator charges {std_commission * 100:.2f}% commission, "
+    print(f"If the validator charges {std_commission * 100:.2f}% commission"
+          f" (which is the current mean), "
           f"the validator will take {commission_charged:.2f} FUND as "
           f"commission.")
-    print(f"The remaining {delegators_earns:.2f} FUND is distributed to "
+    print(f"The remaining {delegators_earns:.2f} FUND is distributed to it's"
           f"delegators.")
     print(f"Staking {principal} FUND of the total "
           f"{total_stake * validator_power:.2f} FUND that the validator "
-          f"stakes, means")
+          f"stakes, means: ")
     print(f"The daily earnings is {daily_earning:.2f} FUND representing a "
           f"daily interest rate of {daily_rate * 100:.4f}%.")
     print(f"The monthly earning is {monthly_earnings:.2f} FUND.")
