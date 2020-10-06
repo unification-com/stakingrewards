@@ -121,7 +121,7 @@ def load_data(genesis):
         timestamps = d['app_state']['beacon']['registered_beacons'][n][
             'timestamps']
         if timestamps is None:
-            log.warning(f"Registered Beacon with not timestamps")
+            log.warning(f"Registered Beacon with no timestamp submissions")
             continue
         for stamp in timestamps:
             beacon_submissions.append(
@@ -133,7 +133,7 @@ def load_data(genesis):
         timestamps = d['app_state']['wrkchain']['registered_wrkchains'][n][
             'blocks']
         if timestamps is None:
-            log.warning(f"Registered WRKChain with not timestamps")
+            log.warning(f"Registered WRKChain with no timestamp submissions")
             continue
         for stamp in timestamps:
             wrkchain_submissions.append(

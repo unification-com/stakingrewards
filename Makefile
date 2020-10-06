@@ -7,3 +7,6 @@ build:
 
 report:
 	docker run -it docker_stakingrewards python -m stakingrewards.cli report --plot
+
+verify:
+	docker run -it docker_stakingrewards python -m stakingrewards.cli verify
