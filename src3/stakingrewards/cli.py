@@ -7,6 +7,7 @@ import requests
 from datetime import datetime
 from time import time
 from pathlib import Path
+from random import randint
 
 import click
 
@@ -19,8 +20,6 @@ TIMESTAMP_COST = 1
 
 MAX_PAGES = 3478
 
-
-# https://rest2.unification.io/txs?message.action=record_wrkchain_hash&page=5
 
 def root_path() -> Path:
     current_script = Path(os.path.abspath(__file__))
@@ -233,13 +232,13 @@ def calc(daily):
           f"{total_stake * validator_power:.2f} FUND that the validator "
           f"stakes, means")
     print(f"The daily earnings is {daily_earning:.2f} FUND representing a "
-          f"daily interest rate of {daily_rate * 100:.4f}%")
-    print(f"The monthly earning is {monthly_earnings:.2f} FUND")
-    print(f"Monthly amount compounded daily is {monthly_rate_comp:.2f} FUND")
+          f"daily interest rate of {daily_rate * 100:.4f}%.")
+    print(f"The monthly earning is {monthly_earnings:.2f} FUND.")
+    print(f"Monthly amount compounded daily is {monthly_rate_comp:.2f} FUND.")
     print(f"The annual earnings is {annual_earnings:.2f} FUND and the earnings "
-          f"compounded is {annual_rate_comp:.2f} FUND")
+          f"compounded is {annual_rate_comp:.2f} FUND.")
     print(f"APR rate is {apr:.2f} % or the compound rate "
-          f"{apr_comp:.2f} %")
+          f"{apr_comp:.2f} %.")
 
     return {
         'daily_rate': daily_rate,
@@ -284,18 +283,18 @@ def report(output, plot, genesis):
     last = accumulation_list[-1][0]
     x2 = acc
     y2 = last
-    log.info(f'First item: {first}')
-    log.info(f'Last item: {last}')
+    log.info(f'First transaction on: {first}')
+    log.info(f'Last transaction on: {last}')
 
     duration = abs((last - first).days)
-    log.info(f'Duration: {duration}')
+    log.info(f'Duration of data set: {duration}')
 
     sample_duration = abs((y2 - y1).days)
     delta = x2 - x1
     per_day = delta / sample_duration
-    log.info(f'{x1} {y1} {x2} {y1}')
-    log.info(f'{sample_duration} days {y1} with delta {delta} is {per_day} '
-             f'FUND per day')
+    log.info(f'{x1} FUND at {y1} <-> {x2} FUND at {y1}')
+    log.info(f'{sample_duration} days {y1} with an increase of {delta} FUND is'
+             f' {per_day} FUND per day')
 
     d = calc(per_day)
 
@@ -310,6 +309,45 @@ def report(output, plot, genesis):
     log.info('Saving artefact')
     target = Path(output)
     target.write_text(json.dumps(d, indent=2, separators=(',', ': ')))
+
+
+@main.command()
+def verify():
+    log.info(f"Cross referencing data from extract and API")
+
+    random_page = randint(0, MAX_PAGES)
+    page = f"https://rest2.unification.io/txs?message.action=" \
+           f"record_wrkchain_hash&page={random_page}"
+    log.info(f"Fetching random page from slow API: {page}")
+    r = requests.get(page)
+    try:
+        data = r.json()
+    except Exception as e:
+        log.error('Slow API failed. Try again.')
+        exit(1)
+
+    total_count = data['total_count']
+    txs = data['txs']
+
+    random_tx = randint(0, 30)
+    txhash = txs[random_tx]['txhash']
+
+    log.info(f"Searching for {txhash} through what should be around "
+             f"{total_count} wrkchain transactions")
+
+    beacon_registrations, wrkchain_registrations, beacon_submissions, \
+    wrkchain_submissions = load_data(None)
+    something = len(wrkchain_submissions)
+    log.info(f"Number of WRKCHAIN submissions in the extract is {something} "
+             f"and number on the number found on the API is {total_count}")
+    for wrkchain_submission in wrkchain_submissions:
+        txhash_b = wrkchain_submission[1]
+        target = txhash_b[2:].upper()
+        print(target)
+        if txhash == target:
+            log.info(f"Found it")
+
+    print(txhash)
 
 
 if __name__ == "__main__":
