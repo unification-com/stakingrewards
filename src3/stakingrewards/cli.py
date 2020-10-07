@@ -214,7 +214,7 @@ def calc(daily):
     monthly_earnings = daily_earning * (365 / 12)
     annual_earnings = daily_earning * 365
 
-    monthly_rate_comp = principal * ((1 + daily_rate) ** 30)
+    monthly_rate_comp = principal * ((1 + daily_rate) ** (365 / 12))
     annual_rate_comp = principal * ((1 + daily_rate) ** 365)
 
     apr = (annual_earnings / principal) * 100
